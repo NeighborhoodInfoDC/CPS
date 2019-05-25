@@ -15,8 +15,8 @@
 %macro Cps_finish_new();
 
   data 
-    &out._was (drop=comp_city)
-    &out._comp
+    &out._was
+    &out._metros
     ;
 
     set &dataset;
@@ -39,25 +39,15 @@
       otherwise
         /** Not DC, MD, VA, or WV **/;
     end;
-
-    ** Comparison file **;
-    if statecd = "11" then comp_city = 1;
-    else if ( statecd = "24" and gtco = 510 ) or ( gtcbsa = 12580 and gtindvpc = 1 ) then comp_city = 2; /** Baltimore **/
-    else if ( gtcbsa = 71650 and statecd = "25" and gtindvpc = 1 ) then comp_city = 3; /** Boston */
-    /***else if ( statecd = "39" and gtco = 035 and gtcbsast in ( 1, 4 ) ) then comp_city = 4;***/ /** Cleveland **/
-    else if ( gtcbsa = 17460 and gtindvpc = 1 ) then comp_city = 4; /** Cleveland **/
-    else if ( gtcbsa = 19100 and gtindvpc = 1 ) then comp_city = 5; /** Dallas **/
-    else if ( gtcbsa = 19820 and gtco = 163 and gtindvpc = 1 ) then comp_city = 6;  /** Detroit **/
-    else if ( gtcbsa = 33340 and gtindvpc = 1 ) then comp_city = 7;  /** Milwaukee **/
-    else if ( gtcbsa = 35380 and gtindvpc = 1 ) then comp_city = 8;  /** New Orleans **/
-    else if ( gtcbsa = 41860 and gtco = 001 and gtindvpc = 1 ) then comp_city = 9; /** Oakland **/
-    else if ( statecd = "42" and gtco = 101 ) then comp_city = 10;  /** Philadelphia **/
-    else if ( statecd = "29" and gtco = 510 ) or ( gtcbsa = 41180 and gtindvpc = 1 ) then comp_city = 11;  /** St. Louis **/
-
-    if not( missing( comp_city ) ) then output &out._comp;
     
-    format comp_city comp_cit.;
+    ** Mid-large metro areas **;
     
+    select ( gtcbsa );
+      when ( 19100, 47900, 26420, 37980, 14460, 12060, 33100, 41860, 38060, 42660 ) output &out._metros;
+      otherwise
+        /** Do nothing **/;
+    end;
+
     format
       hrecord    hrecord.  
       hunits     hunits.   
@@ -710,21 +700,21 @@
 
   %Finalize_data_set( 
     /** Finalize data set parameters **/
-    data=&out._comp,
-    out=&out._comp,
+    data=&out._metros,
+    out=&out._metros,
     outlib=CPS,
-    label="CPS March Supplement, &year, comparison cities",
+    label="CPS March Supplement, &year, mid-large metro areas",
     sortby=ph_seq a_lineno,
     /** Metadata parameters **/
     restrictions=None,
     revisions=%str(&revisions),
     /** File info parameters **/
     printobs=0,
-    freqvars=comp_city a_race race_ethn
+    freqvars=gtcbsa a_race race_ethn
   )
 
   /**** Uncomment to check coding of racial variables ****
-  proc freq data=&out._comp;
+  proc freq data=&out._metros;
     tables a_race * prdtrace pehspnon * prdtrace * race_ethn / missing list nopercent nocum;
   run;
   ****/
