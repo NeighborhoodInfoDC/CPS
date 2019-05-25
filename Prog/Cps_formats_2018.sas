@@ -20,6 +20,22 @@
 
 proc format library=CPS;
 
+VALUE A_RACE  
+	1         =  "White"                         
+	2         =  "Black"                         
+	3         =  "American Indian, Aleut Eskimo" 
+	4         =  "Asian or Pacific Island"       
+	5 = "Multiracial (not assignable)"  /** Urban-added category **/
+;
+
+VALUE RACE_ETHN
+	1 = "White only non-Latino"
+	2 = "Black only non-Latino"
+	3 = "Latino/Hispanic"
+	4 = "American Indian/Alaska Native only non-Latino"
+	5 = "Asian only non-Latino"
+	6 = "Multiracial/other non-Latino";
+
 VALUE hrecord 	(default=32)
 	1         =  "Household record"              
 ;
