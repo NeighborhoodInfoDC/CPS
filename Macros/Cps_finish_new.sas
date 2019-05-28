@@ -14,6 +14,12 @@
 
 %macro Cps_finish_new();
 
+
+ ** Remove gtcbsa. missing Boston from temporary format catalog **;
+  proc catalog catalog=formats;
+    delete gtcbsa / entrytype=format;
+  quit;
+
   data 
     &out._was
     &out._metros
