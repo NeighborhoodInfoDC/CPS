@@ -14,15 +14,19 @@
 
 %macro Cps_finish_new();
 
-  ** Remove gtcbsa. from temporary format catalog (missing Boston MSA) **;
+  %if &year > 2000 %then %do;
   
-  proc catalog catalog=formats;
-    delete gtcbsa / entrytype=format;
-  quit;
-  
+    ** Remove gtcbsa. from temporary format catalog (missing Boston MSA) **;
+    
+    proc catalog catalog=formats;
+      delete gtcbsa / entrytype=format;
+    quit;
+    
+  %end;
+    
   ** Add formats to data set **;
   
-  proc datasets library=work memtype=(data) nolist;
+  proc datasets library=library memtype=(data) nolist;
     modify &dataset;
       format
         hrecord    hrecord.  
@@ -665,7 +669,7 @@
     &out._metros
     ;
 
-    set &dataset;
+    set library.&dataset;
     
     ** Additional variables *****;
 

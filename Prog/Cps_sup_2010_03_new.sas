@@ -26,20 +26,8 @@
 %let revisions = New file.;
 
 
-******************** DO NOT CHANGE ********************;
-%global dataset shyear inpath infile;
-%let shyear = %substr( &year, 3, 2 );
-%let dataset = %mif_select( &year > 2010, Cpsmar&year, Cpsmar&shyear );
-%let out = Cps_sup_&year._03;
-%let inpath = &_dcdata_r_path\CPS\Raw;
-%let infile = asec&year._pubuse.dat;
-
-filename datafile "&inpath\&infile";
-
-libname library %sysfunc(quote(%sysfunc(pathname(work)))) ;
-
-%push_option( ls )
-%push_option( ps )
+********* Program initialization *********;
+%Cps_init()
 
 
 ******************** START OF PROGRAM INSERT ********************;
