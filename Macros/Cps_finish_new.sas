@@ -14,7 +14,7 @@
 
 %macro Cps_finish_new();
 
-  %local metrovar metrocodes;
+  %local metrovar metrocodes racevars;
 
   %pop_option( ls )
   %pop_option( ps )
@@ -742,9 +742,16 @@
       %ucounty( gestfips, geco )
     %end;
     
-    %a_race( prdtrace )
-    %race_ethn( )
-    
+    %if &year >= 2003 %then %do;
+      %a_race( prdtrace )
+      %race_ethn( )
+      %let racevars = a_race prdtrace race_ethn;
+    %end;
+    %else %do;
+      format a_race a_race.;
+      %let racevars = a_race;
+    %end;
+        
     ** Output records **;
 
     select ( statecd );
@@ -775,7 +782,7 @@
     revisions=%str(&revisions),
     /** File info parameters **/
     printobs=0,
-    freqvars=statecd ucounty a_race race_ethn
+    freqvars=statecd ucounty &racevars
   )
 
   %Finalize_data_set( 
@@ -790,7 +797,7 @@
     revisions=%str(&revisions),
     /** File info parameters **/
     printobs=0,
-    freqvars=&metrovar a_race race_ethn
+    freqvars=&metrovar &racevars
   )
     
   /**** Uncomment to check coding of racial variables ****
