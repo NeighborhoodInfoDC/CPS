@@ -4068,6 +4068,22 @@ VALUE tchsp_val	(default=32)
 	1         =  "Topcoded"                      
 ;
 
+/**** 2000 formats ****/
+
+VALUE HG_MSAC 	(default=32)
+	0         =  "Not MSA/PMSA or not identified"
+	0520 = "Atlanta, GA MSA"
+	1120 = "Boston, MA-NH PMSA"
+	1920 = "Dallas, TX PMSA"
+	3360 = "Houston, TX PMSA"
+	5000 = "Miami, FL PMSA"
+	6160 = "Philadelphia, PA-NJ PMSA"
+	6200 = "Phoenix-Mesa, AZ MSA"
+	7360 = "San Francisco, CA PMSA"
+	7600 = "Seattle-Bellevue-Everett, WA PMSA"
+	8840 = "Washington, DC-MD-VA-WV PMSA"
+;
+
 run;
 
 proc catalog catalog=CPS.formats;
