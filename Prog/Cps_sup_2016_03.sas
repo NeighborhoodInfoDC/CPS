@@ -8737,9 +8737,6 @@ USA.
 ******************** END OF PROGRAM INSERT ********************;
 
 
-%pop_option( ls )
-%pop_option( ps )
-
 %Cps_finish_new()
 
 run;

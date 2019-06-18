@@ -14,7 +14,15 @@
 
 %macro Cps_finish_new();
 
+  %local metrovar metrocodes;
+
+  %pop_option( ls )
+  %pop_option( ps )
+
   %if &year > 2000 %then %do;
+  
+    %let metrovar = gtcbsa;
+    %let metrocodes = 19100, 47900, 26420, 37980, 14460, 12060, 33100, 41860, 38060, 42660;
   
     ** Remove gtcbsa. from temporary format catalog (missing Boston MSA) **;
     
@@ -26,6 +34,15 @@
   
   %if &year <= 2000 %then %do;
   
+    %let metrovar = hg_msac;
+    %let metrocodes = 0520, 1120, 1920, 3360, 5000, 6160, 6200, 7360, 7600, 8840;
+  
+    ** Remove hg_msac. from temporary format catalog **;
+    
+    proc catalog catalog=formats;
+      delete hg_msac / entrytype=format;
+    quit;
+    
     ** Format for creating FIPS codes from state names **;
   
     proc sql;
@@ -682,6 +699,8 @@
         tpotc_val  tpotc_val.
         tpmed_val  tpmed_val.
         tchsp_val  tchsp_val.
+        /** 2000 vars **/
+        HG_MSAC    HG_MSAC.  
       ;
   quit;
   
@@ -689,9 +708,7 @@
 
   data 
     &out._was
-    %if &year > 2000 %then %do;
-      &out._metros
-    %end;
+    &out._metros
     ;
 
     set library.&dataset;
@@ -717,7 +734,14 @@
     %end;
 
     %statecd( gestfips )
-    %ucounty( gestfips, gtco )
+    
+    %if &year >= 2005 %then %do;
+      %ucounty( gestfips, gtco )
+    %end;
+    %else %do;
+      %ucounty( gestfips, geco )
+    %end;
+    
     %a_race( prdtrace )
     %race_ethn( )
     
@@ -729,18 +753,14 @@
         /** Not DC, MD, VA, or WV **/;
     end;
     
-    %if &year > 2000 %then %do;
+    ** Mid-large metro areas **;
+  
+    select ( &metrovar );
+      when ( &metrocodes ) output &out._metros;
+      otherwise
+        /** Do nothing **/;
+    end;
     
-      ** Mid-large metro areas **;
-    
-      select ( gtcbsa );
-        when ( 19100, 47900, 26420, 37980, 14460, 12060, 33100, 41860, 38060, 42660 ) output &out._metros;
-        otherwise
-          /** Do nothing **/;
-      end;
-    
-    %end;
-
   run;
   
   %Finalize_data_set( 
@@ -758,25 +778,21 @@
     freqvars=statecd ucounty a_race race_ethn
   )
 
-  %if &year > 2000 %then %do;
+  %Finalize_data_set( 
+    /** Finalize data set parameters **/
+    data=&out._metros,
+    out=&out._metros,
+    outlib=CPS,
+    label="CPS March Supplement, &year, mid-large metro areas",
+    sortby=ph_seq a_lineno,
+    /** Metadata parameters **/
+    restrictions=None,
+    revisions=%str(&revisions),
+    /** File info parameters **/
+    printobs=0,
+    freqvars=&metrovar a_race race_ethn
+  )
     
-    %Finalize_data_set( 
-      /** Finalize data set parameters **/
-      data=&out._metros,
-      out=&out._metros,
-      outlib=CPS,
-      label="CPS March Supplement, &year, mid-large metro areas",
-      sortby=ph_seq a_lineno,
-      /** Metadata parameters **/
-      restrictions=None,
-      revisions=%str(&revisions),
-      /** File info parameters **/
-      printobs=0,
-      freqvars=gtcbsa a_race race_ethn
-    )
-    
-  %end;
-
   /**** Uncomment to check coding of racial variables ****
   proc freq data=&out._metros;
     tables a_race * prdtrace pehspnon * prdtrace * race_ethn / missing list nopercent nocum;
