@@ -1,42 +1,36 @@
 /**************************************************************************
  Program:  Cps_sup_yyyy_03.sas
  Library:  CPS
- Project:  NeighborhoodInfo DC
+ Project:  Urban-Greater DC
  Author:   
  Created:  
- Version:  SAS 9.1
- Environment:  Windows
+ Version:  SAS 9.4
+ Environment:  Local Windows session (desktop)
+ GitHub issue:  
  
- Description:  Read CPS March Supplement from raw data into SAS.
- 
+ Description:  Read CPS March yyyy data.
+
  Based on Cpsmar??.sas written by Jean Roth and downloaded from the
  NBER web site (http://www.nber.org/data/cps_progs.html).
 
  Modifications:
-  10/15/08 PAT  Rewritten not to use ZIP MAGIC.
 **************************************************************************/
 
-%include "K:\Metro\PTatian\DCData\SAS\Inc\Stdhead.sas";
+%include "L:\SAS\Inc\StdLocal.sas";
 
 ** Define libraries **;
 %DCData_lib( CPS )
 
+
+******** Change these parameters based on latest data ********;
+
 %let year = yyyy;
 
-*options obs=100;   *** NB: Uncomment this line to debug program. ***;
+%let revisions = New file.;
 
 
-/***** DO NOT CHANGE *****/
-%let month = 03;
-%let outlib = cps;
-%let out = &outlib..Cps_sup_&year._&month;
-%let shyear = %substr( &year, 3, 2 );
-%let inpath = &_dcdata_path\CPS\Raw;
-%let infile = cpsmar&shyear..dat;
-
-%put _local_;
-
-filename datafile "&inpath\&infile";
+********* Program initialization *********;
+%Cps_init()
 
 
 ******************** START OF PROGRAM INSERT ********************;
@@ -46,7 +40,6 @@ filename datafile "&inpath\&infile";
 ******************** END OF PROGRAM INSERT ********************;
 
 
-%cps_finish;
+%Cps_finish_new()
 
 run;
-
