@@ -22,7 +22,7 @@
   %if &year > 2000 %then %do;
   
     %let metrovar = gtcbsa;
-    %let metrocodes = 19100, 47900, 26420, 37980, 14460, 12060, 33100, 41860, 38060, 42660;
+    %let metrocodes = 19100, 47900, 26420, 37980, 14460, 12060, 33100, 41860, 38060, 42660, 71650;
   
     ** Remove gtcbsa. from temporary format catalog (missing Boston MSA) **;
     
