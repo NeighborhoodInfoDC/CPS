@@ -23,7 +23,7 @@
 
 %let year = 2010;
 
-%let revisions = New file.;
+%let revisions = Updated file version with new code.;
 
 
 ********* Program initialization *********;
