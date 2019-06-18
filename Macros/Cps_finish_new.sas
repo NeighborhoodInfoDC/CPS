@@ -23,6 +23,29 @@
     quit;
     
   %end;
+  
+  %if &year <= 2000 %then %do;
+  
+    ** Format for creating FIPS codes from state names **;
+  
+    proc sql;
+      create table statecodes as
+      select distinct statename, statecode, state
+      from sashelp.zipcode;
+    quit;
+
+    %Data_to_format(
+      FmtLib=work,
+      FmtName=$statecodes,
+      Data=statecodes,
+      Value=upcase( statename ),
+      Label=put( state, z2. ),
+      OtherLabel="",
+      Print=N,
+      Contents=N
+      )
+      
+  %end;
     
   ** Add formats to data set **;
   
@@ -666,7 +689,9 @@
 
   data 
     &out._was
-    &out._metros
+    %if &year > 2000 %then %do;
+      &out._metros
+    %end;
     ;
 
     set library.&dataset;
@@ -676,6 +701,20 @@
     count = 1;
 
     label count = "Population count";
+    
+    %if &year <= 2000 %then %do;
+
+      ** Create state FIPS code from state name **;
+      
+      length gestfips 3;
+      
+      gestfips = input( put( upcase( put( hg_st60, hg_st60l. ) ), $statecodes. ), 8. );
+      
+      label gestfips = "State FIPS code";
+      
+      format gestfips gestfips.;
+      
+    %end;
 
     %statecd( gestfips )
     %ucounty( gestfips, gtco )
@@ -690,13 +729,17 @@
         /** Not DC, MD, VA, or WV **/;
     end;
     
-    ** Mid-large metro areas **;
+    %if &year > 2000 %then %do;
     
-    select ( gtcbsa );
-      when ( 19100, 47900, 26420, 37980, 14460, 12060, 33100, 41860, 38060, 42660 ) output &out._metros;
-      otherwise
-        /** Do nothing **/;
-    end;
+      ** Mid-large metro areas **;
+    
+      select ( gtcbsa );
+        when ( 19100, 47900, 26420, 37980, 14460, 12060, 33100, 41860, 38060, 42660 ) output &out._metros;
+        otherwise
+          /** Do nothing **/;
+      end;
+    
+    %end;
 
   run;
   
@@ -715,20 +758,24 @@
     freqvars=statecd ucounty a_race race_ethn
   )
 
-  %Finalize_data_set( 
-    /** Finalize data set parameters **/
-    data=&out._metros,
-    out=&out._metros,
-    outlib=CPS,
-    label="CPS March Supplement, &year, mid-large metro areas",
-    sortby=ph_seq a_lineno,
-    /** Metadata parameters **/
-    restrictions=None,
-    revisions=%str(&revisions),
-    /** File info parameters **/
-    printobs=0,
-    freqvars=gtcbsa a_race race_ethn
-  )
+  %if &year > 2000 %then %do;
+    
+    %Finalize_data_set( 
+      /** Finalize data set parameters **/
+      data=&out._metros,
+      out=&out._metros,
+      outlib=CPS,
+      label="CPS March Supplement, &year, mid-large metro areas",
+      sortby=ph_seq a_lineno,
+      /** Metadata parameters **/
+      restrictions=None,
+      revisions=%str(&revisions),
+      /** File info parameters **/
+      printobs=0,
+      freqvars=gtcbsa a_race race_ethn
+    )
+    
+  %end;
 
   /**** Uncomment to check coding of racial variables ****
   proc freq data=&out._metros;
